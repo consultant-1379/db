@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ericsson.techgroup.servicegroupcontainers</groupId>
+        <artifactId>db</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.ericsson.oss.servicegroupcontainers</groupId>
+    <artifactId>ERICenmsgmysql-openidm_CXP9032921</artifactId>
+    <packaging>rpm</packaging>
+    <name>db feature CXP module</name>
+
+    <properties>
+        <com.ericsson.oss.rpm.architecture>noarch</com.ericsson.oss.rpm.architecture>
+        <rpm-root>ericsson</rpm-root>
+        <comp-name>3pp</comp-name>
+        <install-path>mysql-openidm</install-path>
+        <publish_artifact>true</publish_artifact>
+        <media.category>db</media.category>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.ericsson.oss.itpf.deployment</groupId>
+                <artifactId>deployment-descriptor-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>configurable-entity</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <configEntity>
+                        <stereotype>SERVICE_PKG</stereotype>
+                        <parameters>
+                            <property name="vm_service_name" defaultValue="sgmysql-openidm" />
+                            <itemType name="vm-package">
+                                <property name="name" defaultValue="ERICenmsgmysql-openidm_CXP9032921" />
+                            </itemType>
+                        </parameters>
+                        <deploymentDependencies>
+                            <deploymentDependency>
+                                <groupId>com.ericsson.oss.itpf.deployment.tools</groupId>
+                                <artifactId>virtual-machine</artifactId>
+                                <qualifier>CONTAINER</qualifier>
+                                <alias>vm</alias>
+                            </deploymentDependency>
+                            <!--ERICenmopenidm has no dependencies-->
+                        </deploymentDependencies>
+                        <assignments>
+                            <!--Assignments from ERICenmopenidm-->
+                            <assign>
+                                <path>vm</path>
+                                <property name="routable_interfaces" value="0" />
+                                <itemType name="vm-service">
+                                    <property name="service_name" value="openidm" />
+                                    <property name="cpus" value="2" />
+                                    <property name="ram" value="4096M" />
+                                    <property name="image_name" value="lsb-image" />
+                                </itemType>
+                                <itemType name="vcs-clustered-service">
+                                    <property name="active" value="1" />
+                                    <property name="dependency_list" value="httpd,sso" />
+                                    <property name="standby" value="1" />
+                                </itemType>
+                            </assign>
+                            <assign>
+                              <path>vm</path>
+                              <scope>CLOUD</scope>
+                                <itemType name="vm-service">
+                                    <property name="cpus" value="2" />
+                                    <property name="ram" value="4096M" />
+                                </itemType>
+                            </assign>
+                        </assignments>
+                    </configEntity>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <skip>true</skip>
+                    <inherited>true</inherited>
+                    <copyright>2014 Ericsson AB All rights reserved</copyright>
+                    <description>${ericsson.rstate}</description>
+                    <group>ERI-NMS</group>
+                    <vendor>Ericsson AB</vendor>
+                    <url>www.ericsson.com</url>
+                  <requires>
+                      <!--Requires from ERICenmopenidm-->
+                      <require>unzip</require>
+                      <require>postgresql92-postgresql</require>
+                      <require>mysql-server</require>
+                      <require>ERICddc_CXP9030294</require>
+                      <require>ERICidenmgmtoidm_CXP9031680</require>
+                      <require>ERICopenidmaccesspolicies_CXP9031742</require>
+                      <require>ERICgenericidentitymgmtpostgresql_CXP9031932</require>
+                  </requires>
+                  <mappings>
+                      <!--Mappings from ERICenmopenidm-->
+                      <mapping>
+                          <directory>/usr/lib/ocf/resource.d</directory>
+                          <filemode>755</filemode>
+                          <username>root</username>
+                          <groupname>root</groupname>
+                          <configuration>false</configuration>
+                          <directoryIncluded>false</directoryIncluded>
+                          <recurseDirectories>false</recurseDirectories>
+                          <sources>
+                              <source>
+                                  <location>src/main/scripts</location>
+                                  <includes>
+                                      <include>openidm-lsb-monitor.bsh</include>
+                                      <include>openidm-configured.bsh</include>
+                                  </includes>
+                              </source>
+                          </sources>
+                      </mapping>
+                      <mapping>
+                          <directory>/ericsson/3pp/mysql-openidm/bin</directory>
+                          <filemode>744</filemode>
+                          <username>mysql</username>
+                          <groupname>enm</groupname>
+                          <configuration>false</configuration>
+                          <directoryIncluded>true</directoryIncluded>
+                          <recurseDirectories>true</recurseDirectories>
+                          <sources>
+                              <source>
+                                  <location>src/main/scripts/</location>
+                                  <includes>
+                                      <include>mysql-openidm_config.sh</include>
+                                      <include>mysql_openidm.sql</include>
+                                  </includes>
+                              </source>
+                          </sources>
+                      </mapping>
+                      <mapping>
+                          <directory>/ericsson/mysql</directory>
+                          <filemode>744</filemode>
+                          <username>mysql</username>
+                          <groupname>enm</groupname>
+                          <configuration>false</configuration>
+                          <directoryIncluded>true</directoryIncluded>
+                          <recurseDirectories>true</recurseDirectories>
+                      </mapping>
+                </mappings>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+</project>

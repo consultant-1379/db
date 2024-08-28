@@ -1,0 +1,6 @@
+#!/bin/bash
+OPENIDM_CONFIGURED_FILE=/ericsson/openidm/openidm.configured
+if [ -f $OPENIDM_CONFIGURED_FILE ] ; then
+  exit 0
+fi
+exit 1
